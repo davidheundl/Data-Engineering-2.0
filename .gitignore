@@ -1,0 +1,31 @@
+# Environment
+.env
+.venv/
+__pycache__/
+*.pyc
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+
+# Results and logs (large, regeneratable)
+results/
+logs/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# uv
+uv.lock
+
+# Raw DiscoGeM data (download separately, not redistributed)
+DiscoGeM 1.0_items/
+DiscoGeM 1.0_labels/
+Dataset/
+
+# Slides
+*.pptx

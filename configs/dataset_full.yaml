@@ -1,0 +1,39 @@
+name: dataset_full
+
+models:
+  generators:
+    - "openai:gpt-4o-mini"
+    - "anthropic:claude-haiku-4-5-20251001"
+    - "mistral:mistral-small-latest"
+    - "deepseek:deepseek-chat"
+  validators:
+    - "openai:gpt-4o-mini"
+    - "anthropic:claude-haiku-4-5-20251001"
+    - "mistral:mistral-small-latest"
+    - "deepseek:deepseek-chat"
+
+sampling:
+  n_items: 45
+  genre_split:
+    Europarl: 15
+    Lit: 15
+    Wiki: 15
+  seed: 42
+
+pipeline:
+  tau_start: 0.1
+  tau_stop: 0.9
+  tau_step: 0.1
+  max_retries: 8
+  retry_delay: 2.0
+  concurrency_per_provider: 4
+  temperature_generate: 0.3
+  max_tokens_generate: 800
+  max_tokens_validate: 10
+
+data:
+  wide_csv: "Dataset/wide_subset.csv"
+  full_csv: "Dataset/full_dataset_subset.csv"
+  sense_definitions: "prompts/pdtb_sense_definitions.json"
+  results_dir: "results"
+  logs_dir: "logs"

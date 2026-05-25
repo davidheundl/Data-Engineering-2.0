@@ -1,0 +1,35 @@
+name: midterm
+
+models:
+  generators:
+    - "openai:gpt-4o-mini"
+    - "anthropic:claude-haiku-4-5-20251001"
+  validators:
+    - "openai:gpt-4o-mini"
+    - "anthropic:claude-haiku-4-5-20251001"
+
+sampling:
+  n_items: 20
+  genre_split:
+    Europarl: 7
+    Lit: 7
+    Wiki: 6
+  seed: 42
+
+pipeline:
+  tau_start: 0.1
+  tau_stop: 0.9
+  tau_step: 0.1
+  max_retries: 5
+  retry_delay: 2.0
+  concurrency_per_provider: 4
+  temperature_generate: 0.3
+  max_tokens_generate: 800
+  max_tokens_validate: 10
+
+data:
+  wide_csv: "DiscoGeM 1.0_items/DiscoGeM1.0.wide.csv"
+  full_csv: "DiscoGeM 1.0_labels/DiscoGeMcorpus_fulldataset.csv"
+  sense_definitions: "prompts/pdtb_sense_definitions.json"
+  results_dir: "results"
+  logs_dir: "logs"

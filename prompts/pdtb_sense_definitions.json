@@ -1,0 +1,117 @@
+{
+  "_meta": {
+    "source": "PLACEHOLDER — user must provide verbatim definitions from the PDTB 3.0 annotation manual.",
+    "filled": false,
+    "instructions": "For each Level-2 sense, fill in 'definition' (verbatim from PDTB 3.0 manual) and 'example' (canonical example from the manual). The pipeline will fail at Stage 2/3 if any sense used by an item has filled=false or empty fields."
+  },
+  "cause": {
+    "definition": "This tag is used when the situations described in Arg1 and Arg2 are causally influenced but are not in a conditional relation",
+    "example": "Runways at San Francisco weren’t damaged, but traﬃc was being limited yesterday to 27 arrivals and 27 departures an hour – down from 33 to 45 an hour normally – mainly because the noise level in the control tower was overwhelming without the windows, an FAA spokeswoman said.",
+    "filled": true
+  },
+  "cause+belief": {
+    "definition": "",
+    "example": "",
+    "filled": false
+  },
+  "cause+speechact": {
+    "definition": "",
+    "example": "",
+    "filled": false
+  },
+  "condition": {
+    "definition": "",
+    "example": "",
+    "filled": false
+  },
+  "condition+speechact": {
+    "definition": "",
+    "example": "",
+    "filled": false
+  },
+  "negative-condition": {
+    "definition": "",
+    "example": "",
+    "filled": false
+  },
+  "purpose": {
+    "definition": "",
+    "example": "",
+    "filled": false
+  },
+  "concession": {
+    "definition": "This tag is used when an expected causal relation is cancelled or denied by the situation described in one of the arguments.",
+    "example": "The documents also said that although the 64-year-old Mr. Cray has been working on the project for more than six years, the Cray-3 machine is at least another year away from a fully operational prototype. ",
+    "filled": true
+  },
+  "concession+speechact": {
+    "definition": "",
+    "example": "",
+    "filled": false
+  },
+  "contrast": {
+    "definition": " Contrast is used when at least two diﬀerences between Arg1 and Arg2 are highlighted.",
+    "example": "While the earnings picture confuses, observers say the major forces expected to shape the industry in the coming year are clearer.",
+    "filled": true
+  },
+  "similarity": {
+    "definition": "This tag is used when one or more similarities between Arg1 and Arg2 are highlighted with respect to what each argument predicates as a whole or to some entities it mentions.",
+    "example": ". . . that even after Monday’s 10% decline, the Straits Times index is up 24% this year, so investors who bailed out generally did so profitably. Similarly, Kuala Lumpur’s composite index yesterday ended 27.5% above its 1988 close.",
+    "filled": true
+  },
+  "synchronous": {
+    "definition": "This tag is used when there is some degree of temporal overlap between the events described by the arguments. All forms of overlap are included.",
+    "example": "Knowing a tasty – and free – meal when they eat one, the executives gave the chefs a standing ovation.",
+    "filled": true
+  },
+  "asynchronous": {
+    "definition": "This tag is used when one event is described as preceding the other.",
+    "example": "A buﬀet breakfast was held in the museum, where food and drinks are banned to everyday visitors. Then, in the guests’ honor, the speedway hauled out four drivers, crews and even the oﬃcial Indianapolis 500 announcer for a 10-lap exhibition race. ",
+    "filled": true
+  },
+  "conjunction": {
+    "definition": "The tag Conjunction is used when both arguments bear the same relation to some other situation evoked in the discourse. It indicates that the two arguments make the same contribution with respect to that situation, or contribute to it together. It differs from most other relations in that the arguments don't directly relate to each other, but to this other situation.",
+    "example": "Arg1: I can adjust the amount of insurance I want against the amount going into investment. Arg2: I can pay more or less than the so-called target premium in a given year. (Implicit=Conjunction) [wsj 0041]",
+    "filled": true
+  },
+  "disjunction": {
+    "definition": "The tag Expansion.Disjunction is used when the two arguments are pre- sented as alternatives, with either one or both holding. As with Conjunction, Disjunction is used when both its arguments bear the same relation to some other situation evoked in the discourse, making a similar contribution with respect to that situation. While the arguments also relate to each other as alternatives (with one or both holding), they also both relate in the same way to this other situation.",
+    "example": "If we want to support students, we might adopt the idea used in other countries of oﬀering more scholarships based on something called ”scholarship,” rather than on the government’s idea of ”service.” Or we might provide a tax credit for working students.",
+    "filled": true
+  },
+  "equivalence": {
+    "definition": "This tag is used when both arguments are taken to describe the same situation, but from diﬀerent perspectives.",
+    "example": "Chairman Krebs says the California pension fund is getting a bargain price that wouldn’t have been oﬀered to others. In other words: The real estate has a higher value than the pending deal suggests. [wsj 0331]",
+    "filled": true
+  },
+  "exception": {
+    "definition": "This tag is used when one argument evokes a set of circumstances in which the described situation holds, and the other argument indicates one or more instances where it doesn’t.",
+    "example": " Twenty-five years ago the poet Richard Wilbur modernized this 17th-century comedy merely by avoiding ”the zounds sort of thing,” as he wrote in his introduction. Otherwise, the scene remained Celimene’s house in 1666. ",
+    "filled": true
+  },
+  "instantiation": {
+    "definition": "This tag is used when one argument describes a situation as holding in a set of circumstances, while the other argument describes one or more of those circumstances.",
+    "example": " . . and foreign companies such as Givaudan that deal with those industries are being hit the hardest. But in general, all foreign-trading companies are feeling the pinch. [wsj 1469]",
+    "filled": true
+  },
+  "level-of-detail": {
+    "definition": "This tag is used when both arguments describe the same situation, but in less or more detail.",
+    "example": "Many modern scriptwriters seem to be incapable of writing drama, or anything else, without foul-mouthed cursing. Sex and violence are routinely included even when they are irrelevant to the script, and high-tech special eﬀects are continually substituted for good plot and character development. In short, we have a movie and television industry that is either incapable or petrified of making a movie unless it carries a PG-13 or R rating. [wsj 0911",
+    "filled": true
+  },
+  "manner": {
+    "definition": "This tag is used when the situation described by one argument presents the manner in which the situation described by other argument has happened or been done. Manner answers “how” questions such as “How were the children playing?”. While Manner may be the only relation that holds between two arguments, it is often the case that another sense (Purpose, Result or Condition) is taken to hold as well.",
+    "example": "McCaw is oﬀering $125 a share for 22 million LIN shares, thereby challenging LIN’s proposal to spin oﬀ its television properties, pay shareholders a $20-a-share special dividend and combine its cellular-telephone operations with BellSouth’s cellular business. [wsj 2443] Arg1 answers the question How did McCaw challenge LIN’s proposal?",
+    "filled": true
+  },
+  "substitution": {
+    "definition": "This tag is used when arguments are presented as exclusive alternatives, with one being ruled out.",
+    "example": "Eliminate arbitrage and liquidity will decline instead of rising, creating more volatility instead of less.",
+    "filled": true
+  },
+  "norel": {
+    "definition": "",
+    "example": "",
+    "filled": false
+  }
+}
