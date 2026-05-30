@@ -20,6 +20,7 @@ pipeline:
   tau_start: 0.1
   tau_stop: 0.9
   tau_step: 0.1
+  softmax_temperature: 0.5
   max_retries: 5
   retry_delay: 2.0
   concurrency_per_provider: 4

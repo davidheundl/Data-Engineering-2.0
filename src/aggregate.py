@@ -7,8 +7,8 @@ For each (item, candidate_sense):
   3. Compute stats: max_validity, mean_validity, n_explanations,
      n_generators_abstained, validator_std (avg stddev of validator scores
      per explanation), commission_score = (1 - max_validity) * (1 - validator_std).
-  4. Sweep tau in [0.1, 0.9, 0.1]: build the LLM label distribution as
-     equal mass on validated senses (max_validity >= tau), normalized.
+  4. Sweep tau in [0.1, 0.9, 0.1]: build the LLM label distribution via
+     softmax over mean_validity scores of senses with max_validity >= tau.
 
 Writes distributions.jsonl + metrics.json.
 """
@@ -26,6 +26,7 @@ from .prep import read_items
 from .schemas import (
     DistributionRecord,
     GenerationRecord,
+    LEVEL2_SENSES_NO_NOREL,
     PrepItem,
     RunMetrics,
     SenseStats,
@@ -55,17 +56,30 @@ def _validator_std_per_explanation(scores: list[float]) -> float:
 
 
 def _build_llm_distribution(
-    per_sense_stats: dict[str, SenseStats], tau: float
+    per_sense_stats: dict[str, SenseStats], tau: float, temperature: float
 ) -> dict[str, float]:
-    """Equal mass on senses with max_validity >= tau, normalized.
+    """Softmax distribution over mean_validity of tau-validated senses.
 
-    If no senses are validated, return an empty dict (signals no prediction).
+    Steps:
+      1. Filter to senses with max_validity >= tau.
+      2. Apply softmax with temperature over their mean_validity scores:
+         p_i = exp((s_i - max_s) / T) / sum(exp((s_j - max_s) / T))
+    If no senses pass the tau filter, returns an empty dict.
+    Temperature < 1 sharpens the distribution, > 1 flattens it.
     """
-    validated = [s for s, st in per_sense_stats.items() if st.max_validity >= tau]
+    validated = {
+        s: st.mean_validity
+        for s, st in per_sense_stats.items()
+        if st.max_validity >= tau
+    }
     if not validated:
         return {}
-    p = 1.0 / len(validated)
-    return {s: p for s in validated}
+    senses = list(validated.keys())
+    scores = list(validated.values())
+    max_score = max(scores)
+    exps = [math.exp((s - max_score) / temperature) for s in scores]
+    total = sum(exps)
+    return {sense: e / total for sense, e in zip(senses, exps)}
 
 
 def _aggregate_one_item(
@@ -89,7 +103,7 @@ def _aggregate_one_item(
             expls_by_sense[g.candidate_sense].append(expl)
 
     per_sense_stats: dict[str, SenseStats] = {}
-    for sense in item.candidate_senses:
+    for sense in LEVEL2_SENSES_NO_NOREL:
         explanations = expls_by_sense.get(sense, [])
         # mean validity per explanation (avg across validators)
         per_expl_means: list[float] = []
@@ -128,7 +142,9 @@ def _aggregate_one_item(
     llm_dist_per_tau: dict[str, dict[str, float]] = {}
     for tau in config.pipeline.tau_values():
         key = f"{tau:.2f}"
-        llm_dist_per_tau[key] = _build_llm_distribution(per_sense_stats, tau)
+        llm_dist_per_tau[key] = _build_llm_distribution(
+            per_sense_stats, tau, config.pipeline.softmax_temperature
+        )
 
     record = DistributionRecord(
         item_id=item.item_id,

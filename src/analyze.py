@@ -90,6 +90,9 @@ def _kld_curve(
         aggregate_kld.append(mean(klds) if klds else float("nan"))
 
     # ----- Per-validator curves -----
+    # NOTE: Per-validator curves use equal-mass distribution (not softmax)
+    # for simplicity, since per-validator mean_validity is not precomputed.
+    # The aggregate curve above uses softmax via distributions.jsonl.
     validator_curves: dict[str, list[float]] = {}
     for validator in config.models.validators:
         curve: list[float] = []
@@ -98,7 +101,7 @@ def _kld_curve(
             for rec in dists:
                 # Build distribution using only this validator's max_validity
                 validated = []
-                for sense in rec.candidate_senses:
+                for sense in rec.per_sense_stats:
                     mv = _max_validity(rec.item_id, sense, validator)
                     if mv >= tau:
                         validated.append(sense)

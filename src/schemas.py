@@ -38,6 +38,8 @@ LEVEL2_SENSES: list[str] = [
     "norel",
 ]
 
+LEVEL2_SENSES_NO_NOREL: list[str] = [s for s in LEVEL2_SENSES if s != "norel"]
+
 Genre = Literal["Europarl", "Lit", "Wiki"]
 AgreementBin = Literal["high", "low"]
 

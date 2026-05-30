@@ -19,7 +19,7 @@ def test_generation_prompt_uses_full_context(filled_definitions, sample_prep_ite
     assert "JSON" in user
 
 
-def test_validation_prompt_is_probability_only(filled_definitions, sample_prep_item):
+def test_validation_prompt_uses_score_scale(filled_definitions, sample_prep_item):
     _, user = build_validation_prompt(
         "cause",
         sample_prep_item.arg1,
@@ -27,8 +27,9 @@ def test_validation_prompt_is_probability_only(filled_definitions, sample_prep_i
         "Because Arg1 caused Arg2.",
         str(filled_definitions),
     )
-    assert "Probability:" in user
-    assert "ONLY the probability" in user
+    assert "0\u201310" in user
+    assert "Score:" in user
+    assert "genuinely critical" in user
 
 
 def test_fail_loud_on_unfilled_definition(empty_definitions, sample_prep_item):

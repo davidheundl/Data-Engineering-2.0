@@ -69,20 +69,18 @@ def build_generation_prompt(
         f"The candidate discourse relation sense is {sense}.\n\n"
         f"Definition: {entry['definition']}\n\n"
         f"Canonical example: {entry['example']}\n\n"
-        f"List every distinct explanation for why the implicit discourse relation "
-        f"between Argument 1 and Argument 2 below could express {sense}. "
-        f"You MUST provide at least one explanation. Even if the relation seems "
-        f"weak or unlikely for this pair, produce the best possible justification "
-        f"a careful annotator could give for {sense}. Do not refuse, do not "
-        f"return an empty list, do not say the relation is unjustifiable — always "
-        f"argue the case as well as you can.\n\n"
-        f"Do not paraphrase the same idea in different words. Do not include "
-        f"introductory phrases. Output strictly valid JSON.\n\n"
+        f"Provide the single best explanation for why the implicit discourse "
+        f"relation between Argument 1 and Argument 2 below could express "
+        f"{sense}. Even if the relation seems weak or unlikely for this pair, "
+        f"produce the best possible justification a careful annotator could "
+        f"give for {sense}. Do not refuse or say the relation is "
+        f"unjustifiable — always argue the case as well as you can.\n\n"
+        f"Do not include introductory phrases. Output strictly valid JSON.\n\n"
         f"Argument 1: {arg1}\n"
         f"Argument 2: {arg2}\n\n"
         f"Output JSON schema:\n"
         f'{{\n'
-        f'  "explanations": ["...", "..."]\n'
+        f'  "explanation": "..."\n'
         f'}}'
     )
     return GENERATION_SYSTEM, user
@@ -108,16 +106,28 @@ def build_validation_prompt(
     entry = _lookup_sense(definitions, sense)
 
     user = (
-        f"We have collected an annotation for a discourse relation together "
-        f"with a reason for the label. Your task is to judge whether the reason "
-        f"makes sense for the label. Provide the probability (0.0 to 1.0) that "
-        f"the reason makes sense for the label. Give ONLY the probability as a "
-        f"number, no other words or explanation.\n\n"
-        f"Sense: {sense}\n"
+        f"You are evaluating whether an explanation correctly justifies "
+        f"assigning a specific discourse relation label to a pair of text "
+        f"arguments.\n\n"
+        f"Discourse relation sense: {sense}\n"
         f"Definition: {entry['definition']}\n\n"
         f"Argument 1: {arg1}\n"
         f"Argument 2: {arg2}\n\n"
-        f"Reason for label {sense}: {explanation}\n\n"
-        f"Probability:"
+        f"Explanation for why this pair expresses '{sense}': {explanation}\n\n"
+        f"Rate the explanation on a 0\u201310 integer scale:\n"
+        f"  0\u20132: The explanation is poor \u2014 it does not convincingly justify "
+        f"'{sense}' for this argument pair, or the relation clearly does not "
+        f"hold.\n"
+        f"  3\u20135: The explanation is mediocre \u2014 there is a weak or partial "
+        f"connection, but it is not compelling.\n"
+        f"  6\u20137: The explanation is reasonable \u2014 it makes a fair case for "
+        f"'{sense}', though some aspects could be stronger.\n"
+        f"  8\u201310: The explanation is strong \u2014 it clearly and convincingly "
+        f"justifies '{sense}' for this specific argument pair.\n\n"
+        f"Be genuinely critical. If the discourse relation does not fit this "
+        f"argument pair well, the explanation cannot be good regardless of how "
+        f"well-written it is. Give ONLY a single integer (0\u201310), no other "
+        f"text.\n\n"
+        f"Score:"
     )
     return VALIDATION_SYSTEM, user

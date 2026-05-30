@@ -11,6 +11,10 @@ import argparse
 import asyncio
 from pathlib import Path
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 from .pipeline import run_pipeline
 
 

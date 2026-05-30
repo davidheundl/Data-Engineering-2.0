@@ -24,7 +24,7 @@ from .config import Config, resolve_api_keys
 from .llm_client import FatalLLMError, LLMClient, LLMResponse
 from .prep import read_items
 from .prompts import build_generation_prompt
-from .schemas import GenerationRecord, PrepItem
+from .schemas import GenerationRecord, LEVEL2_SENSES_NO_NOREL, PrepItem
 
 PROGRESS_INTERVAL = 50
 
@@ -79,14 +79,19 @@ def _parse_generation_response(text: str) -> tuple[list[str], bool, str | None]:
             return [stripped[:2000]], False, None
         return [], True, f"json error: {e}"
 
+    # Support both single ("explanation": "...") and legacy list ("explanations": [...])
+    single = data.get("explanation")
+    if single and isinstance(single, str) and single.strip():
+        return [single.strip()], False, None
+
     explanations = data.get("explanations") or []
     if not isinstance(explanations, list):
         explanations = []
     explanations = [str(x).strip() for x in explanations if str(x).strip()]
 
     abstained = len(explanations) == 0
-    reason = "model returned empty explanations list" if abstained else None
-    return explanations, abstained, reason
+    reason = "model returned empty explanation" if abstained else None
+    return explanations[:1] if explanations else [], abstained, reason
 
 
 def _append_cost(costs_csv: Path, stage: str, model: str, item_id: str, resp: LLMResponse) -> None:
@@ -204,7 +209,7 @@ async def run_generate(config: Config, run_dir: Path, project_root: Path) -> Pat
     # Build task list
     tasks: list[asyncio.Task] = []
     for item in items:
-        for sense in item.candidate_senses:
+        for sense in LEVEL2_SENSES_NO_NOREL:
             for model in config.models.generators:
                 if (item.item_id, sense, model) in done:
                     continue

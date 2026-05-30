@@ -1,4 +1,4 @@
-"""Smoke tests for Stage 4 (Aggregate) — KLD and distribution building."""
+"""Smoke tests for Stage 4 (Aggregate) — KLD and softmax distribution."""
 from __future__ import annotations
 
 import math
@@ -29,19 +29,29 @@ def _stats(mv: float) -> SenseStats:
     )
 
 
-def test_llm_distribution_equal_mass_normalized():
+def test_llm_distribution_softmax_normalized():
     stats = {
         "cause": _stats(0.9),
         "conjunction": _stats(0.7),
         "contrast": _stats(0.2),
     }
-    dist = _build_llm_distribution(stats, tau=0.5)
+    dist = _build_llm_distribution(stats, tau=0.5, temperature=0.5)
     assert set(dist.keys()) == {"cause", "conjunction"}
     assert math.isclose(sum(dist.values()), 1.0)
-    assert dist["cause"] == dist["conjunction"]
+    # Softmax: higher mean_validity -> higher probability
+    assert dist["cause"] > dist["conjunction"]
+
+
+def test_llm_distribution_high_temperature_approaches_uniform():
+    stats = {
+        "cause": _stats(0.9),
+        "conjunction": _stats(0.7),
+    }
+    dist = _build_llm_distribution(stats, tau=0.5, temperature=100.0)
+    assert math.isclose(dist["cause"], dist["conjunction"], abs_tol=0.01)
 
 
 def test_llm_distribution_empty_when_none_validated():
     stats = {"cause": _stats(0.1)}
-    dist = _build_llm_distribution(stats, tau=0.5)
+    dist = _build_llm_distribution(stats, tau=0.5, temperature=0.5)
     assert dist == {}

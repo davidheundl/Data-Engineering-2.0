@@ -35,6 +35,7 @@ class PipelineConfig(BaseModel):
     tau_start: float = 0.1
     tau_stop: float = 0.9
     tau_step: float = 0.1
+    softmax_temperature: float = 0.5
     max_retries: int = 5
     retry_delay: float = 2.0
     concurrency_per_provider: int = 4

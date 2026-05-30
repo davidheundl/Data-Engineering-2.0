@@ -1,8 +1,8 @@
 {
   "_meta": {
-    "source": "PLACEHOLDER — user must provide verbatim definitions from the PDTB 3.0 annotation manual.",
+    "source": "this provides all Definitions and explanations",
     "filled": false,
-    "instructions": "For each Level-2 sense, fill in 'definition' (verbatim from PDTB 3.0 manual) and 'example' (canonical example from the manual). The pipeline will fail at Stage 2/3 if any sense used by an item has filled=false or empty fields."
+    "instructions": "pipelines fails otherwise"
   },
   "cause": {
     "definition": "This tag is used when the situations described in Arg1 and Arg2 are causally influenced but are not in a conditional relation",
@@ -10,34 +10,34 @@
     "filled": true
   },
   "cause+belief": {
-    "definition": "",
-    "example": "",
-    "filled": false
+    "definition": "This tag is used when evidence is provided to cause the hearer to believe a claim. The belief is implicit.",
+    "example": "With this sort of sentiment common, it’s natural for investors to seek out “defensive” investment.",
+    "filled": true
   },
   "cause+speechact": {
-    "definition": "",
-    "example": "",
-    "filled": false
+    "definition": "This tag is used when a reason is provided for the speaker uttering a speech act. The speech act is implicit.",
+    "example": "Maybe I’m a little stuﬀy, but I wouldn’t sell them,” sniﬀs Bob Machon, owner of Papa’s Sports Cards in Menlo Park, California.",
+    "filled": true
   },
   "condition": {
-    "definition": "",
-    "example": "",
-    "filled": false
+    "definition": "This tag is used when one argument presents a situation as unrealized (the antecedent), which (when realized) would lead to the situation described by the other arg (the consequent). There are distinct senses for interpreting the arguments in terms of their semantics or the speech acts they convey. The default is their semantics.",
+    "example": "Call Jim Wright‘s oﬃce in downtown Fort Worth, Texas, these days and the receptionist still answers the phone, “Speaker Wright‘s oﬃce.”",
+    "filled": true
   },
   "condition+speechact": {
-    "definition": "",
-    "example": "",
-    "filled": false
+    "definition": "This tag is used when the consequent is an implicit speech act. So far, all cases of Condition+SA are Arg2-as-cond, so Arg1 is the implicit SA.",
+    "example": "When it comes to buying and selling shares, Westridge Capital Management Inc. takes a back seat to no one.",
+    "filled": true
   },
   "negative-condition": {
-    "definition": "",
-    "example": "",
-    "filled": false
+    "definition": "This tag is used when one argument (the antecedent) describes a situation presented as unrealized, which if it doesn’t occur, would lead to the situation described by the other argument (the consequent). There are distinct senses for interpreting the arguments in terms of semantics or speech acts, with the default being semantics.",
+    "example": "The National Institutes of Health policy would require researchers to cut financial ties with health-care businesses or lose their government money. [wsj 0975]",
+    "filled": true
   },
   "purpose": {
-    "definition": "",
-    "example": "",
-    "filled": false
+    "definition": "This tag is used when one argument presents an action that an AGENT undertakes with the purpose of the GOAL conveyed by the other argument being achieved. Usually (but not always), the agent undertaking the action is the same agent aiming to achieve the goal.",
+    "example": "There are the strict monetarists, who believe that floating exchange rates free an economy to stabilize its price level by stabilizing the monetary aggregate.",
+    "filled": true
   },
   "concession": {
     "definition": "This tag is used when an expected causal relation is cancelled or denied by the situation described in one of the arguments.",
@@ -45,12 +45,12 @@
     "filled": true
   },
   "concession+speechact": {
-    "definition": "",
-    "example": "",
-    "filled": false
+    "definition": "This tag is used when the speech act (SA) associated with one argument is cancelled or denied by the other argument or its SA. The only sub-type for which tokens have been identified is Comparison.Concession+SpeechAct.Arg2-as-denier+SA, where it is the SA associated with Arg1 that is cancelled or denied by Arg2 or its associated SA. (N.B. The SA that is cancelled MUST be implicit.)",
+    "example": "Congress closed this loophole last year, or thought it did. (wsj 1574)",
+    "filled": true
   },
   "contrast": {
-    "definition": " Contrast is used when at least two diﬀerences between Arg1 and Arg2 are highlighted.",
+    "definition": "Contrast is used when at least two diﬀerences between Arg1 and Arg2 are highlighted.",
     "example": "While the earnings picture confuses, observers say the major forces expected to shape the industry in the coming year are clearer.",
     "filled": true
   },
@@ -108,10 +108,5 @@
     "definition": "This tag is used when arguments are presented as exclusive alternatives, with one being ruled out.",
     "example": "Eliminate arbitrage and liquidity will decline instead of rising, creating more volatility instead of less.",
     "filled": true
-  },
-  "norel": {
-    "definition": "",
-    "example": "",
-    "filled": false
   }
 }

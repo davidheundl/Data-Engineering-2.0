@@ -1,12 +1,13 @@
-"""Stage 3: Validate — every validator model scores every explanation.
+"""Stage 3: Validate — cross-validation only (no self-validation).
 
-For each (explanation, validator_model) pair, make one LLM call. Self-
-validation is allowed (the same model scoring its own explanations) — this
-matches EVADE's one-expl regime.
+For each (explanation, validator_model) pair where the validator is a
+different model than the generator, make one LLM call. The same model
+never scores its own explanations.
 
-Defensive parsing: strip whitespace, find first float, clamp to [0.0, 1.0].
-Parsing failures are recorded with parsing_success=False and a fallback
-score of 0.0, plus a line appended to logs/parsing_errors_{run_id}.jsonl.
+Scoring uses a 0–10 integer scale. Defensive parsing: find first integer,
+clamp to [0, 10], normalize to [0.0, 1.0]. Parsing failures are recorded
+with parsing_success=False and a fallback score of 0.0, plus a line
+appended to logs/parsing_errors_{run_id}.jsonl.
 
 Resume support: skips (generation_id, explanation_index, validator_model)
 triples already present in validations.jsonl.
@@ -31,7 +32,7 @@ from .prompts import build_validation_prompt
 from .schemas import GenerationRecord, PrepItem, ValidationRecord
 
 PROGRESS_INTERVAL = 100
-FLOAT_RE = re.compile(r"[-+]?\d*\.?\d+(?:[eE][-+]?\d+)?")
+INT_RE = re.compile(r"\b(\d{1,2})\b")
 
 
 def _existing_triples(validations_path: Path) -> set[tuple[str, str, str, str]]:
@@ -65,24 +66,20 @@ def _existing_triples(validations_path: Path) -> set[tuple[str, str, str, str]]:
 
 
 def parse_validity_score(text: str) -> tuple[float, bool]:
-    """Parse the validator response. Returns (score, parsing_success).
+    """Parse a 0–10 integer score from the validator response.
 
+    Returns (normalized_score_0_to_1, parsing_success).
     On parsing failure, returns (0.0, False).
     """
-    match = FLOAT_RE.search(text or "")
+    match = INT_RE.search(text or "")
     if not match:
         return 0.0, False
     try:
-        score = float(match.group(0))
+        raw = int(match.group(1))
     except ValueError:
         return 0.0, False
-    # Heuristic: only normalize obvious 0-10 scale values (>= 2.0).
-    # Values in [1.0, 2.0) are treated as clamping errors and clamped to 1.0,
-    # since a 0-10 model would not produce 1.2 to mean "low probability".
-    if score >= 2.0 and score <= 10.0:
-        score = score / 10.0
-    score = max(0.0, min(1.0, score))
-    return score, True
+    raw = max(0, min(10, raw))
+    return raw / 10.0, True
 
 
 def _log_parsing_error(
@@ -212,6 +209,13 @@ async def run_validate(config: Config, run_dir: Path, project_root: Path) -> Pat
     done = _existing_triples(out_path)
     definitions_path = str(project_root / config.data.sense_definitions)
 
+    # Warn if any generator has no cross-validators
+    generator_models = {g.generator_model for g in gens if not g.abstained and g.explanations}
+    for gm in sorted(generator_models):
+        cross = [v for v in config.models.validators if v != gm]
+        if not cross:
+            print(f"  WARNING: generator {gm} has no cross-validators; its explanations will receive 0 scores")
+
     api_keys = resolve_api_keys()
     client = LLMClient(
         api_keys=api_keys,
@@ -229,6 +233,8 @@ async def run_validate(config: Config, run_dir: Path, project_root: Path) -> Pat
             continue
         for explanation in gen.explanations:
             for validator_model in config.models.validators:
+                if validator_model == gen.generator_model:
+                    continue
                 if (gen.item_id, gen.candidate_sense, explanation, validator_model) in done:
                     continue
                 tasks.append(
