@@ -73,10 +73,33 @@ async def run_pipeline(
     *,
     stages: list[str],
     run_id: str | None = None,
+    fork_from: str | None = None,
+    fork_name: str | None = None,
 ) -> Path:
-    """Run a subset of stages. If run_id is given, resume into that run dir."""
+    """Run a subset of stages. If run_id is given, resume into that run dir.
+
+    fork_from: copy items/generations/validations/costs from an existing run
+               into a new run directory, then run the requested stages on it.
+    fork_name: custom name for the forked run directory.
+    """
     config = load_config(config_path)
-    if run_id is None:
+
+    if fork_from is not None:
+        source_dir = find_run_dir(config, project_root, fork_from)
+        new_name = fork_name or f"{fork_from}_reanalysis"
+        run_dir = project_root / config.data.results_dir / new_name
+        run_dir.mkdir(parents=True, exist_ok=True)
+        # Copy data files from the source run
+        for fname in ["items.jsonl", "generations.jsonl", "validations.jsonl", "costs.csv", "config.yaml"]:
+            src = source_dir / fname
+            if src.exists():
+                shutil.copy2(src, run_dir / fname)
+        # Copy current sense definitions
+        senses_src = project_root / config.data.sense_definitions
+        if senses_src.exists():
+            shutil.copy2(senses_src, run_dir / senses_src.name)
+        print(f"=== Forked from {fork_from} into {run_dir.name} ===")
+    elif run_id is None:
         run_dir = prepare_run_dir(config, config_path, project_root)
     else:
         run_dir = find_run_dir(config, project_root, run_id)

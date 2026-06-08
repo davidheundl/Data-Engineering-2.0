@@ -8,6 +8,7 @@ Produces these artifacts in results/{run_id}/analysis/:
   4. commission_error_candidates.csv — ranked (item, sense) pairs
   5. per_genre_breakdown.json — all metrics by genre
   6. worked_example.json — one item traced end-to-end
+  7. crowd_vs_llm_scatter.png — 2D scatter of crowd vs LLM sense probabilities
 """
 from __future__ import annotations
 
@@ -19,6 +20,7 @@ from pathlib import Path
 from statistics import mean, pstdev
 from typing import Any
 
+import numpy as np
 import matplotlib
 
 matplotlib.use("Agg")
@@ -420,6 +422,99 @@ def _worked_example(
         json.dump(payload, f, indent=2)
 
 
+def _crowd_vs_llm_scatter(
+    items: list[PrepItem],
+    dists: list[DistributionRecord],
+    config: Config,
+    out_path: Path,
+) -> None:
+    """2D scatter: crowd sense probability (x) vs LLM sense probability (y).
+
+    Produces a 2x3 grid of subplots across tau thresholds (0.30–0.80).
+    Points where crowd=0 are jittered left of the y-axis to avoid overlap.
+    """
+    items_by_id = {it.item_id: it for it in items}
+    all_taus = config.pipeline.tau_values()
+    taus = [t for t in all_taus if 0.25 <= t <= 0.85][:6]
+    if not taus:
+        taus = all_taus[:6]
+
+    genre_colors = {"Europarl": "tab:blue", "Lit": "tab:orange", "Wiki": "tab:green"}
+    rng = np.random.default_rng(42)
+
+    ncols = 3
+    nrows = math.ceil(len(taus) / ncols)
+    fig, axes = plt.subplots(nrows, ncols, figsize=(14, 4.5 * nrows))
+    axes = np.atleast_2d(axes).reshape(-1)
+
+    for idx, tau in enumerate(taus):
+        ax = axes[idx]
+        key = f"{tau:.2f}"
+
+        # Collect points
+        xs_pos, ys_pos, genres_pos = [], [], []
+        ys_zero = []  # crowd=0 points (only need y)
+        genres_zero = []
+
+        for rec in dists:
+            item = items_by_id[rec.item_id]
+            llm_dist = rec.llm_label_distribution_per_tau.get(key, {})
+            for sense in rec.per_sense_stats:
+                crowd_p = item.crowd_sense_distribution.get(sense, 0.0)
+                llm_p = llm_dist.get(sense, 0.0)
+                if crowd_p > 0:
+                    xs_pos.append(crowd_p)
+                    ys_pos.append(llm_p)
+                    genres_pos.append(item.genre)
+                else:
+                    ys_zero.append(llm_p)
+                    genres_zero.append(item.genre)
+
+        # Diagonal reference
+        ax.plot([0, 1], [0, 1], ls="--", color="gray", alpha=0.5, lw=1, zorder=1)
+
+        # Crowd-zero points: jitter into [-0.02, 0]
+        if ys_zero:
+            x_jit = rng.uniform(-0.02, 0, size=len(ys_zero))
+            ax.scatter(x_jit, ys_zero, s=12, alpha=0.3, color="gray",
+                       edgecolors="none", zorder=2)
+
+        # Crowd-positive points: color by genre
+        for genre, color in genre_colors.items():
+            gx = [x for x, g in zip(xs_pos, genres_pos) if g == genre]
+            gy = [y for y, g in zip(ys_pos, genres_pos) if g == genre]
+            if gx:
+                ax.scatter(gx, gy, s=30, alpha=0.6, color=color,
+                           edgecolors="none", label=genre, zorder=3)
+
+        ax.set_xlim(-0.03, 1.02)
+        ax.set_title(f"tau = {tau:.2f}", fontsize=10)
+        ax.grid(alpha=0.2)
+        ax.text(0.98, 0.02,
+                f"n(crowd>0)={len(xs_pos)}\nn(crowd=0)={len(ys_zero)}",
+                transform=ax.transAxes, fontsize=7, ha="right", va="bottom",
+                bbox=dict(boxstyle="round,pad=0.3", fc="white", alpha=0.7))
+
+    # Hide unused subplots
+    for idx in range(len(taus), len(axes)):
+        axes[idx].set_visible(False)
+
+    # Shared labels and legend
+    fig.supxlabel("Crowd probability", fontsize=12)
+    fig.supylabel("LLM probability", fontsize=12)
+    handles = [plt.Line2D([0], [0], marker="o", color="w", markerfacecolor=c,
+               markersize=8, label=g) for g, c in genre_colors.items()]
+    handles.append(plt.Line2D([0], [0], marker="o", color="w",
+                   markerfacecolor="gray", markersize=6, alpha=0.4,
+                   label="crowd = 0"))
+    fig.legend(handles=handles, loc="lower center", ncol=4, fontsize=9,
+               frameon=True)
+    fig.suptitle("Crowd vs LLM Sense Probability", fontsize=14)
+    plt.tight_layout(rect=[0.02, 0.05, 1, 0.96])
+    plt.savefig(out_path, dpi=120)
+    plt.close()
+
+
 def run_analyze(config: Config, run_dir: Path, project_root: Path) -> Path:
     items = read_items(run_dir / "items.jsonl")
     gens = read_generations(run_dir / "generations.jsonl")
@@ -436,6 +531,7 @@ def run_analyze(config: Config, run_dir: Path, project_root: Path) -> Path:
     )
     _per_genre_breakdown(items, dists, config, analysis_dir / "per_genre_breakdown.json")
     _worked_example(items, gens, vals, dists, analysis_dir / "worked_example.json")
+    _crowd_vs_llm_scatter(items, dists, config, analysis_dir / "crowd_vs_llm_scatter.png")
 
     print(f"[Stage 5] Wrote analysis artifacts to {analysis_dir}")
     return analysis_dir

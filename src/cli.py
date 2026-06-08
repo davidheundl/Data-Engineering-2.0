@@ -41,6 +41,8 @@ def main() -> None:
         help='Comma-separated stages: prep,generate,validate,aggregate,analyze (or "all")',
     )
     p_run.add_argument("--run-id", default=None, help="Resume into existing run dir")
+    p_run.add_argument("--fork-from", default=None, help="Copy data from existing run into new dir, then run stages")
+    p_run.add_argument("--fork-name", default=None, help="Custom name for the forked run directory")
 
     p_an = sub.add_parser("analyze", help="Run analyze stage only")
     p_an.add_argument("--config", required=True)
@@ -57,6 +59,8 @@ def main() -> None:
                 project_root,
                 stages=stages,
                 run_id=args.run_id,
+                fork_from=args.fork_from,
+                fork_name=args.fork_name,
             )
         )
     elif args.command == "analyze":

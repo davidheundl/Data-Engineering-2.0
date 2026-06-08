@@ -23,7 +23,7 @@ _WRITE_LOCK = asyncio.Lock()
 from .config import Config, resolve_api_keys
 from .llm_client import FatalLLMError, LLMClient, LLMResponse
 from .prep import read_items
-from .prompts import build_generation_prompt
+from .prompts import build_generation_prompt, get_enabled_senses
 from .schemas import GenerationRecord, LEVEL2_SENSES_NO_NOREL, PrepItem
 
 PROGRESS_INTERVAL = 50
@@ -206,10 +206,14 @@ async def run_generate(config: Config, run_dir: Path, project_root: Path) -> Pat
         log_path=project_root / log_path,
     )
 
+    # Use enabled senses from definitions file (respects filled=true/false)
+    enabled_senses = get_enabled_senses(definitions_path)
+    print(f"[Stage 2] Using {len(enabled_senses)} enabled senses: {enabled_senses}")
+
     # Build task list
     tasks: list[asyncio.Task] = []
     for item in items:
-        for sense in LEVEL2_SENSES_NO_NOREL:
+        for sense in enabled_senses:
             for model in config.models.generators:
                 if (item.item_id, sense, model) in done:
                     continue

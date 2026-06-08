@@ -30,6 +30,19 @@ def load_sense_definitions(path: str) -> dict[str, dict]:
         return json.load(f)
 
 
+def get_enabled_senses(path: str) -> list[str]:
+    """Return senses with filled=true, excluding _meta and norel."""
+    definitions = load_sense_definitions(path)
+    return [
+        sense
+        for sense, entry in definitions.items()
+        if not sense.startswith("_")
+        and sense != "norel"
+        and isinstance(entry, dict)
+        and entry.get("filled", False)
+    ]
+
+
 def _lookup_sense(definitions: dict[str, dict], sense: str) -> dict:
     if sense not in definitions:
         raise SenseDefinitionMissing(

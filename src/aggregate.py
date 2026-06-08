@@ -23,6 +23,7 @@ from statistics import mean, pstdev
 from .config import Config
 from .generate import read_generations
 from .prep import read_items
+from .prompts import get_enabled_senses
 from .schemas import (
     DistributionRecord,
     GenerationRecord,
@@ -87,6 +88,7 @@ def _aggregate_one_item(
     item_gens: list[GenerationRecord],
     item_vals: list[ValidationRecord],
     config: Config,
+    enabled_senses: list[str] | None = None,
 ) -> tuple[DistributionRecord, dict[str, SenseStats]]:
     # Group validations by (sense, explanation_text) -> list of validator scores
     vals_by_sense_expl: dict[tuple[str, str], list[float]] = defaultdict(list)
@@ -102,8 +104,9 @@ def _aggregate_one_item(
         for expl in g.explanations:
             expls_by_sense[g.candidate_sense].append(expl)
 
+    senses_to_use = enabled_senses if enabled_senses is not None else LEVEL2_SENSES_NO_NOREL
     per_sense_stats: dict[str, SenseStats] = {}
-    for sense in LEVEL2_SENSES_NO_NOREL:
+    for sense in senses_to_use:
         explanations = expls_by_sense.get(sense, [])
         # mean validity per explanation (avg across validators)
         per_expl_means: list[float] = []
@@ -161,6 +164,11 @@ def run_aggregate(config: Config, run_dir: Path, project_root: Path) -> tuple[Pa
     gens = read_generations(run_dir / "generations.jsonl")
     vals = read_validations(run_dir / "validations.jsonl")
 
+    # Load enabled senses from definitions file
+    defs_path = str(project_root / config.data.sense_definitions)
+    enabled_senses = get_enabled_senses(defs_path)
+    print(f"[Stage 4] Using {len(enabled_senses)} enabled senses: {enabled_senses}")
+
     gens_by_item: dict[str, list[GenerationRecord]] = defaultdict(list)
     for g in gens:
         gens_by_item[g.item_id].append(g)
@@ -176,7 +184,8 @@ def run_aggregate(config: Config, run_dir: Path, project_root: Path) -> tuple[Pa
     with dist_path.open("w") as f:
         for item in items:
             rec, _ = _aggregate_one_item(
-                item, gens_by_item.get(item.item_id, []), vals_by_item.get(item.item_id, []), config
+                item, gens_by_item.get(item.item_id, []), vals_by_item.get(item.item_id, []), config,
+                enabled_senses=enabled_senses,
             )
             f.write(rec.model_dump_json() + "\n")
             records.append(rec)

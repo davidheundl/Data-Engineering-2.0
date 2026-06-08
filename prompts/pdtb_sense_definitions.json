@@ -12,12 +12,12 @@
   "cause+belief": {
     "definition": "This tag is used when evidence is provided to cause the hearer to believe a claim. The belief is implicit.",
     "example": "With this sort of sentiment common, it’s natural for investors to seek out “defensive” investment.",
-    "filled": true
+    "filled": false
   },
   "cause+speechact": {
     "definition": "This tag is used when a reason is provided for the speaker uttering a speech act. The speech act is implicit.",
     "example": "Maybe I’m a little stuﬀy, but I wouldn’t sell them,” sniﬀs Bob Machon, owner of Papa’s Sports Cards in Menlo Park, California.",
-    "filled": true
+    "filled": false
   },
   "condition": {
     "definition": "This tag is used when one argument presents a situation as unrealized (the antecedent), which (when realized) would lead to the situation described by the other arg (the consequent). There are distinct senses for interpreting the arguments in terms of their semantics or the speech acts they convey. The default is their semantics.",
@@ -27,7 +27,7 @@
   "condition+speechact": {
     "definition": "This tag is used when the consequent is an implicit speech act. So far, all cases of Condition+SA are Arg2-as-cond, so Arg1 is the implicit SA.",
     "example": "When it comes to buying and selling shares, Westridge Capital Management Inc. takes a back seat to no one.",
-    "filled": true
+    "filled": false
   },
   "negative-condition": {
     "definition": "This tag is used when one argument (the antecedent) describes a situation presented as unrealized, which if it doesn’t occur, would lead to the situation described by the other argument (the consequent). There are distinct senses for interpreting the arguments in terms of semantics or speech acts, with the default being semantics.",
@@ -47,7 +47,7 @@
   "concession+speechact": {
     "definition": "This tag is used when the speech act (SA) associated with one argument is cancelled or denied by the other argument or its SA. The only sub-type for which tokens have been identified is Comparison.Concession+SpeechAct.Arg2-as-denier+SA, where it is the SA associated with Arg1 that is cancelled or denied by Arg2 or its associated SA. (N.B. The SA that is cancelled MUST be implicit.)",
     "example": "Congress closed this loophole last year, or thought it did. (wsj 1574)",
-    "filled": true
+    "filled": false
   },
   "contrast": {
     "definition": "Contrast is used when at least two diﬀerences between Arg1 and Arg2 are highlighted.",
@@ -107,6 +107,30 @@
   "substitution": {
     "definition": "This tag is used when arguments are presented as exclusive alternatives, with one being ruled out.",
     "example": "Eliminate arbitrage and liquidity will decline instead of rising, creating more volatility instead of less.",
+    "filled": true
+  },
+  "temporal": {
+    "level": 1,
+    "definition": "This class is used when the situations described by the arguments are related temporally, either by overlap (synchrony) or by one preceding the other (asynchrony).",
+    "example": "Knowing a tasty \u2013 and free \u2013 meal when they eat one, the executives gave the chefs a standing ovation. [synchronous overlap] / A buffet breakfast was held in the museum. Then, the speedway hauled out four drivers for a 10-lap exhibition race. [temporal sequence]",
+    "filled": true
+  },
+  "contingency": {
+    "level": 1,
+    "definition": "This class is used when the situations described by the arguments are causally influenced, including cause-effect relations, conditions under which a situation holds, and purpose or goal relations where an action is undertaken to achieve an outcome.",
+    "example": "Runways weren\u2019t damaged, but traffic was limited mainly because the noise level was overwhelming. [cause] / Call Jim Wright\u2019s office and the receptionist still answers the phone. [condition] / Researchers must cut financial ties or lose their government money. [purpose]",
+    "filled": true
+  },
+  "comparison": {
+    "level": 1,
+    "definition": "This class is used when the discourse relation between the arguments highlights differences (contrast), similarities, or when an expected causal relation is cancelled or denied (concession) between the situations described by the arguments.",
+    "example": "While the earnings picture confuses, the major forces shaping the industry are clearer. [contrast] / Even after Monday\u2019s decline, the index is up 24% this year. Similarly, Kuala Lumpur\u2019s index ended 27.5% above its close. [similarity] / Although Mr. Cray has been working for six years, the machine is at least another year away. [concession]",
+    "filled": true
+  },
+  "expansion": {
+    "level": 1,
+    "definition": "This class is used when one argument expands the situation described by the other, including providing additional detail, an equivalent restatement, an instantiation, an exception, a conjunction of related facts, a disjunction of alternatives, a manner specification, or a substitution of one alternative for another.",
+    "example": "I can adjust the amount of insurance. I can pay more or less than the target premium. [conjunction] / Chairman Krebs says the fund is getting a bargain price. In other words: The real estate has a higher value. [equivalence] / Foreign companies are being hit hardest. But in general, all foreign-trading companies are feeling the pinch. [instantiation]",
     "filled": true
   }
 }
