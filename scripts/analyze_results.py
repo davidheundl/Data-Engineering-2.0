@@ -94,13 +94,25 @@ def _get_llm_dist(rec: DistributionRecord, tau: str = "0.30") -> dict[str, float
 
 
 def load_comparative_results(path: Path) -> list[dict]:
-    """Load comparative_results.jsonl (raw dicts, no Pydantic model)."""
+    """Load comparative_results.jsonl (raw dicts, no Pydantic model).
+
+    Records with distribution=None (failed/timed-out validator calls) are
+    skipped - downstream plots assume distribution is a dict.
+    """
     results = []
+    skipped = 0
     with path.open() as f:
         for line in f:
             line = line.strip()
-            if line:
-                results.append(json.loads(line))
+            if not line:
+                continue
+            r = json.loads(line)
+            if not isinstance(r.get("distribution"), dict):
+                skipped += 1
+                continue
+            results.append(r)
+    if skipped:
+        print(f"  Skipped {skipped} comparative_results with no distribution")
     return results
 
 

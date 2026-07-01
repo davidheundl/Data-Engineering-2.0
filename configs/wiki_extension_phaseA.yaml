@@ -1,0 +1,39 @@
+name: wiki_extension
+
+# Phase A: top up missing OpenAI + Mistral generations (Anthropic + DeepSeek
+# stay where they are), then validate with all 4 providers as long as the
+# Anthropic budget cap holds.
+models:
+  generators:
+    - "openai:gpt-4o-mini"
+    - "mistral:mistral-small-latest"
+  validators:
+    - "openai:gpt-4o-mini"
+    - "anthropic:claude-haiku-4-5-20251001"
+    - "mistral:mistral-small-latest"
+    - "deepseek:deepseek-chat"
+
+sampling:
+  n_items: 630
+  genre_split:
+    Wiki: 630
+  seed: 42
+
+pipeline:
+  tau_start: 0.1
+  tau_stop: 0.9
+  tau_step: 0.1
+  softmax_temperature: 0.5
+  max_retries: 5
+  retry_delay: 2.0
+  concurrency_per_provider: 4
+  temperature_generate: 0.3
+  max_tokens_generate: 1500
+  max_tokens_validate: 10
+
+data:
+  wide_csv: "DiscoGeM 1.0_items/DiscoGeM1.0.wide.csv"
+  full_csv: "DiscoGeM 1.0_labels/DiscoGeMcorpus_fulldataset.csv"
+  sense_definitions: "prompts/pdtb_sense_definitions.json"
+  results_dir: "results"
+  logs_dir: "logs"
